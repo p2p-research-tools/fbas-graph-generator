@@ -1,5 +1,5 @@
 [package]
-name = "fbas_trust_graph_generator"
+name = "fbas_graph_generator"
 version = "0.1.0"
 edition = "2021"
 authors = ["Charmaine Ndolo <Charmaine.Ndolo@hu-berlin.de>"]
@@ -10,7 +10,7 @@ default-run = "graph_generator"
 
 [[bin]]
 name = "graph_generator"
-path = "src/graph_generator.rs"
+path = "src/main.rs"
 
 [dependencies]
 fbas_analyzer = { path = "../fbas_analyzer", default-features = false}

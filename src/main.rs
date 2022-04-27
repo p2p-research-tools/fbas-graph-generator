@@ -3,6 +3,8 @@ use fbas_reward_distributor::*;
 
 use std::path::PathBuf;
 use structopt::StructOpt;
+
+mod graph;
 mod io;
 
 /// Rank nodes of an FBAS and write the results as a graph in a CSV.
@@ -10,7 +12,7 @@ mod io;
 /// and type of data stored in the file.
 #[derive(Debug, StructOpt)]
 #[structopt(
-    name = "graph_writer",
+    name = "graph_generator",
     about = "Rank nodes of an FBAS and write the results as a graph in a CSV",
     author = "Charmaine Ndolo"
 )]
@@ -36,6 +38,11 @@ struct Opt {
     /// Default behaviour is to always check for QI.
     #[structopt(short = "nq", long = "no-quorum-intersection")]
     dont_check_for_qi: bool,
+
+    /// Identify nodes by their public key where possible.
+    /// Default is not to and an empty string is written in the "label" field.
+    #[structopt(short = "p", long = "pretty")]
+    pks: bool,
 }
 
 #[derive(Debug, StructOpt)]
@@ -80,17 +87,21 @@ fn main() {
         },
         None => panic!("error occured while reading input file name"),
     };
-    let mut alg_as_str = format!("{:?}", alg);
-    alg_as_str.truncate(16); // remove the enum variants - hacky but the longest is approxpowerindex
-    alg_as_str = alg_as_str.to_lowercase();
+    let alg_as_str = match alg {
+        RankingAlg::NodeRank => String::from("node_rank"),
+        RankingAlg::ExactPowerIndex(_) => String::from("exact_power_index"),
+        RankingAlg::ApproxPowerIndex(_, _) => String::from("approx_power_index"),
+    };
     output_path = format!("{}_{}", output_path, alg_as_str);
     let fbas = io::load_fbas(&input_filename, args.ignore_inactive_nodes);
     let node_ids: Vec<NodeId> = (0..fbas.all_nodes().len()).collect();
-    let rankings = compute_influence(&node_ids, &fbas, alg, false, qi_check);
+    let rankings = compute_influence(&node_ids, &fbas, alg, args.pks, qi_check);
+    let adj_list = graph::generate_adjacency_list(&fbas);
+    let node_list = graph::generate_node_list_with_weight(&rankings);
     let output_dir = io::create_output_dir(args.output.as_ref());
     if output_dir.is_some() {
-        io::write_nodelist_to_file(output_dir.clone(), output_path.clone());
-        io::write_edgelist_to_file(output_dir, output_path);
+        io::write_nodelist_to_file(output_dir.clone(), output_path.clone(), node_list);
+        io::write_edgelist_to_file(output_dir, output_path, adj_list);
     } else {
         eprintln!("unable to write to specified output dir");
     }

@@ -19,8 +19,13 @@ mod io;
 struct Opt {
     /// Path to directory where file should be saved.
     /// Defaults to "./graphs".
-    #[structopt(short, long)]
+    #[structopt(short = "o", long = "output")]
     output: Option<PathBuf>,
+
+    /// Overwrite file if it is present in the filesystem.
+    /// Default behaviour is not to do this and abort a file is found with the same name.
+    #[structopt(short, long)]
+    overwrite: bool,
 
     /// Path to JSON file describing the FBAS in stellarbeat.org "nodes" format.
     /// Will use STDIN if omitted.
@@ -100,8 +105,13 @@ fn main() {
     let node_list = graph::generate_node_list_with_weight(&rankings);
     let output_dir = io::create_output_dir(args.output.as_ref());
     if output_dir.is_some() {
-        io::write_nodelist_to_file(output_dir.clone(), output_path.clone(), node_list);
-        io::write_edgelist_to_file(output_dir, output_path, adj_list);
+        io::write_nodelist_to_file(
+            output_dir.clone(),
+            output_path.clone(),
+            node_list,
+            args.overwrite,
+        );
+        io::write_edgelist_to_file(output_dir, output_path, adj_list, args.overwrite);
     } else {
         eprintln!("unable to write to specified output dir");
     }

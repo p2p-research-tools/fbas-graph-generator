@@ -23,9 +23,17 @@ pub(crate) fn write_nodelist_to_file(
     output_dir: Option<String>,
     filename: String,
     node_list: Vec<String>,
+    overwrite: bool,
 ) {
     if let Some(path_to_dir) = output_dir {
         let file_name = format!("{}/{}{}{}", path_to_dir, filename, "_nodelist", ".csv");
+        if !overwrite {
+            assert!(
+                !Path::new(&file_name).exists(),
+                "File {} exists. Refusing to overwrite.\n Use --overwrite if this is intended.",
+                file_name
+            );
+        }
         let file = File::create(file_name.clone()).expect("Error creating file");
         let mut file = LineWriter::new(file);
         let header = "Id,Label,weight\n".as_bytes();
@@ -42,12 +50,20 @@ pub(crate) fn write_edgelist_to_file(
     output_dir: Option<String>,
     filename: String,
     adj_list: Vec<String>,
+    overwrite: bool,
 ) {
     if let Some(path_to_dir) = output_dir {
         let file_name = format!(
             "{}/{}{}{}",
             path_to_dir, filename, "_adjacency_list", ".csv"
         );
+        if !overwrite {
+            assert!(
+                !Path::new(&file_name).exists(),
+                "File {} exists. Refusing to overwrite.\n Use --overwrite if this is intended.",
+                file_name
+            );
+        }
         let file = File::create(file_name.clone()).expect("Error creating file");
         let mut file = LineWriter::new(file);
         for edges in adj_list {

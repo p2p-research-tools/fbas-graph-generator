@@ -66,6 +66,8 @@ pub(crate) fn load_fbas(nodes_path: &Path, ignore_inactive_nodes: bool) -> Fbas 
             fbas_analyzer::FilteredNodes::from_json_file(nodes_path, |v| v["active"] == false);
         fbas = fbas.without_nodes_pretty(&inactive_nodes.into_pretty_vec());
     }
-    eprintln!("Loaded FBAS with {} nodes.", fbas.number_of_nodes());
+    let unsatisfiable_nodes: Vec<usize> = fbas.unsatisfiable_nodes().into_iter().collect();
+    fbas = fbas.without_nodes(&unsatisfiable_nodes);
+    eprintln!("Processing FBAS with {} nodes.", fbas.number_of_nodes());
     fbas
 }

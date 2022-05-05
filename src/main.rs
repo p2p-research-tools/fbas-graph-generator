@@ -18,7 +18,7 @@ mod io;
 )]
 struct Opt {
     /// Path to directory where file should be saved.
-    /// Defaults to "
+    /// Defaults to "./graphs".
     #[structopt(short, long)]
     output: Option<PathBuf>,
 

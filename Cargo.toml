@@ -16,6 +16,6 @@ path = "src/main.rs"
 
 [dependencies]
 fbas_analyzer = { path = "../fbas_analyzer", default-features = false}
-fbas_reward_distributor = {path = "../fbas-reward-distributor", features = ["cli"]}
+fbas-reward-distributor = {path = "../fbas-reward-distributor", features = ["cli"]}
 hex = "0.4.3"
 structopt = "0.3"

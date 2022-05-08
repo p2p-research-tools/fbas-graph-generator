@@ -22,10 +22,10 @@ cargo run --release -- -h
 The command
 
 ```
-cargo run --release -- test_data/mobilecoin_nodes_2021-10-22.json -i exact-power-index
+cargo run --release -- test_data/mobilecoin_nodes_2021-10-22.json -i -p -o example_output exact-power-index
 ```
 
-ranks the nodes in the FBAS and creates the following two files in the `graphs/` directory
+ranks the nodes in the FBAS and creates the following two files in the `example_output/` directory
 
 ```
 mobilecoin_nodes_2021-10-22_exact_power_index_nodelist.csv

@@ -4,10 +4,10 @@ Generate trust graphs for FBASs like [Stellar](https://www.stellar.org/).
 
 The binary reads an FBAS in [stellarbeat](https://stellarbeat.io/)'s JSON format and
 
-    - ranks the nodes using the [fbas_rewards_distributor](https://gitlab.informatik.hu-berlin.de/ti/theses/student-content/ndolo-charmaine-ma/fbas-reward-distributor)
-    - writes 2 files containing commonly used graph encodings, i.e.
-        - a nodes list with weights (using one of the algorithms implemented in the above tool) for each node and
-        - an adjacency list
+- ranks the nodes using the [fbas_rewards_distributor](https://gitlab.informatik.hu-berlin.de/ti/theses/student-content/ndolo-charmaine-ma/fbas-reward-distributor)
+- writes 2 files containing commonly used graph encodings, i.e.
+    - a nodes list with weights (using one of the algorithms implemented in the above tool) for each node and
+    - an adjacency list
 
 All nodes with 'unsatisfiable' quorum sets are not included in the output and nodes marked as inactive can optionally be excluded from the output.
 
@@ -29,6 +29,6 @@ ranks the nodes in the FBAS and creates the following two files in the `example_
 
 ```
 mobilecoin_nodes_2021-10-22_power_index_enum_nodelist.csv
-mobilecoin_nodes_2021-10-22_power_index__enum_adjacency_list.csv
+mobilecoin_nodes_2021-10-22_power_index_enum_adjacency_list.csv
 
 ```

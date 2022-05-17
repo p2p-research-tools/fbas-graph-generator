@@ -1,11 +1,11 @@
-# fbas_graph_generator
+# FBAS graph generator
 
-Generate weighted trust graphs for FBASs like [Stellar](https://www.stellar.org/).
+Generate trust graphs for FBASs like [Stellar](https://www.stellar.org/).
 
-The binary takes an FBAS in [stellarbeat](https://stellarbeat.io/)'s JSON format
+The binary reads an FBAS in [stellarbeat](https://stellarbeat.io/)'s JSON format and
 
-    1. ranks the nodes using the [fbas_rewards_distributor]()
-    2. returns 2 files containing commonly used graph encodings, i.e.
+    - ranks the nodes using the [fbas_rewards_distributor](https://gitlab.informatik.hu-berlin.de/ti/theses/student-content/ndolo-charmaine-ma/fbas-reward-distributor)
+    - writes 2 files containing commonly used graph encodings, i.e.
         - a nodes list with weights (using one of the algorithms implemented in the above tool) for each node and
         - an adjacency list
 
@@ -22,13 +22,13 @@ cargo run --release -- -h
 The command
 
 ```
-cargo run --release -- test_data/mobilecoin_nodes_2021-10-22.json -i -p -o example_output exact-power-index
+cargo run --release -- test_data/mobilecoin_nodes_2021-10-22.json -i -p -o example_output power-index-enum
 ```
 
 ranks the nodes in the FBAS and creates the following two files in the `example_output/` directory
 
 ```
-mobilecoin_nodes_2021-10-22_exact_power_index_nodelist.csv
-mobilecoin_nodes_2021-10-22_exact_power_index_adjacency_list.csv
+mobilecoin_nodes_2021-10-22_power_index_enum_nodelist.csv
+mobilecoin_nodes_2021-10-22_power_index__enum_adjacency_list.csv
 
 ```

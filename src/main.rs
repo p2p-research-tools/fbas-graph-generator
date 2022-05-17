@@ -56,12 +56,12 @@ enum RankingAlgConfig {
     NodeRank,
     /// Use Shapley-Shubik power indices to calculate nodes' importance in the FBAS. Not
     /// recommended for FBAS with many players because of time complexity
-    ExactPowerIndex,
+    PowerIndexEnum,
     /// Approximate Shapley values as a measure of nodes' importance in the FBAS. The number of
     /// samples to use must be passed if selected.
     /// The computation of minimal quorums can optionally be done before we start approximation.
     /// Useful, e.g. for timing measurements.
-    ApproxPowerIndex { s: usize },
+    PowerIndexApprox { s: usize },
 }
 
 /// Rank nodes using either S-S Power Index or NodeRank and return a sorted list of nodes
@@ -81,8 +81,8 @@ fn main() {
     let qi_check = !args.dont_check_for_qi;
     let alg = match args.alg_config {
         RankingAlgConfig::NodeRank => RankingAlg::NodeRank,
-        RankingAlgConfig::ExactPowerIndex => RankingAlg::ExactPowerIndex(None),
-        RankingAlgConfig::ApproxPowerIndex { s } => RankingAlg::ApproxPowerIndex(s, None),
+        RankingAlgConfig::PowerIndexEnum => RankingAlg::PowerIndexEnum(None),
+        RankingAlgConfig::PowerIndexApprox { s } => RankingAlg::PowerIndexApprox(s, None),
     };
     let input_filename = args.nodes_path;
     let mut output_path = match input_filename.file_stem() {
@@ -94,13 +94,21 @@ fn main() {
     };
     let alg_as_str = match alg {
         RankingAlg::NodeRank => String::from("node_rank"),
-        RankingAlg::ExactPowerIndex(_) => String::from("exact_power_index"),
-        RankingAlg::ApproxPowerIndex(_, _) => String::from("approx_power_index"),
+        RankingAlg::PowerIndexEnum(_) => String::from("power_index_enum"),
+        RankingAlg::PowerIndexApprox(_, _) => String::from("power_index_approx"),
     };
     output_path = format!("{}_{}", output_path, alg_as_str);
     let fbas = io::load_fbas(&input_filename, args.ignore_inactive_nodes);
     let node_ids: Vec<NodeId> = (0..fbas.all_nodes().len()).collect();
-    let rankings = compute_influence(&node_ids, &fbas, alg, args.pks, qi_check);
+    let mut rankings = compute_influence(&node_ids, &fbas, alg.clone(), args.pks, qi_check);
+    // normalise noderank scores
+    if alg == RankingAlg::NodeRank {
+        let node_rank_sum: Score = rankings.iter().map(|v| v.2 as Score).sum();
+        for (_, node_ranking) in rankings.iter_mut().enumerate() {
+            let normalised_ranking = node_ranking.2 / node_rank_sum;
+            node_ranking.2 = f64::trunc(normalised_ranking * 1000.0) / 1000.0;
+        }
+    }
     let adj_list = graph::generate_adjacency_list(&fbas);
     let node_list = graph::generate_node_list_with_weight(&rankings);
     let output_dir = io::create_output_dir(args.output.as_ref());

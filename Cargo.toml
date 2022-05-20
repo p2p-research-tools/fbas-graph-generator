@@ -15,7 +15,7 @@ name = "graph_generator"
 path = "src/main.rs"
 
 [dependencies]
-fbas_analyzer = { path = "../fbas_analyzer", default-features = false}
-fbas-reward-distributor = {path = "../fbas-reward-distributor", default-features = true}
+fbas_analyzer = { version = "0.7", default-features = false}
+fbas-reward-distributor = { git = "https://github.com/cndolo/fbas-reward-distributor", tag = "v0.1.0", default-features = true}
 hex = "0.4.3"
 structopt = "0.3"

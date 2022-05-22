@@ -19,3 +19,6 @@ fbas_analyzer = { version = "0.7", default-features = false}
 fbas-reward-distributor = { git = "https://github.com/cndolo/fbas-reward-distributor", tag = "v0.1.0", default-features = true}
 hex = "0.4.3"
 structopt = "0.3"
+
+[dev-dependencies]
+tempfile = "3.3.0"

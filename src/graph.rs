@@ -14,7 +14,6 @@ pub(crate) fn generate_adjacency_list(fbas: &Fbas) -> Vec<String> {
         for target in contained_nodes.into_iter() {
             adj_list[target].push(node.to_string());
         }
-        adj_list[node].dedup();
     }
 
     adj_list.iter().map(|nodelist| nodelist.join(" ")).collect()
@@ -29,4 +28,31 @@ pub fn generate_node_list_with_weight(rankings: &[NodeRanking]) -> Vec<String> {
         nodelist.push(line)
     }
     nodelist
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fbas_analyzer::Fbas;
+    use std::path::Path;
+
+    #[test]
+    fn output_adjacency_list_is_ok() {
+        let fbas = Fbas::from_json_file(Path::new("test_data/trivial.json"));
+        let actual = generate_adjacency_list(&fbas);
+        let expected = vec!["0 0 1 2", "1 0 1 2", "2 0 1 2"];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn output_nodelist_is_ok() {
+        let rankings = vec![
+            (0, "nodeA".to_string(), 0.0),
+            (1, "nodeB".to_string(), 0.1),
+            (2, "nodeC".to_string(), 0.2),
+        ];
+        let actual = generate_node_list_with_weight(&rankings);
+        let expected = vec!["0,nodeA,0\n", "1,nodeB,0.1\n", "2,nodeC,0.2\n"];
+        assert_eq!(actual, expected);
+    }
 }

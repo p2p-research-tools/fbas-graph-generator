@@ -3,7 +3,7 @@
 ![MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 [![dependency status](https://deps.rs/repo/github/cndolo/fbas-graph-generator/status.svg)](https://deps.rs/repo/github/cndolo/fbas-graph-generator)
 
-Generate trust graphs for FBASs like [Stellar](https://www.stellar.org/).
+Generate (weighted) trust graphs for FBASs like [Stellar](https://www.stellar.org/).
 
 The binary reads an FBAS in [stellarbeat](https://stellarbeat.io/)'s JSON format and
 
@@ -13,6 +13,16 @@ The binary reads an FBAS in [stellarbeat](https://stellarbeat.io/)'s JSON format
     - an adjacency list
 
 All nodes with 'unsatisfiable' quorum sets are not included in the output and nodes marked as inactive can optionally be excluded from the output.
+
+## Output Format
+
+The data written by the tool adheres to convential graph writing formats used by popular graph analysis tools such as Gephi and NetworkX.
+
+1. The adjacency list consists of lines with nodes labels.
+    [See NetworkX documentation for description](https://networkx.org/documentation/stable/reference/readwrite/adjlist.html#format).
+2. See [Gephi Spreadsheet](https://gephi.org/users/supported-graph-formats/spreadsheet/) for details on the nodelist.
+
+## Using
 
 Run the following for usage instructions:
 

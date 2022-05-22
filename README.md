@@ -1,6 +1,8 @@
 # FBAS graph generator
 
 ![MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Build](https://github.com/cndolo/fbas-graph-generator/actions/workflows/test.yml/badge.svg)](https://github.com/cndolo/fbas-graph-generator/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/cndolo/fbas-graph-generator/branch/main/graph/badge.svg?token=C1FPEQU21W)](https://codecov.io/gh/cndolo/fbas-graph-generator)
 [![dependency status](https://deps.rs/repo/github/cndolo/fbas-graph-generator/status.svg)](https://deps.rs/repo/github/cndolo/fbas-graph-generator)
 
 Generate (weighted) trust graphs for FBASs like [Stellar](https://www.stellar.org/).
@@ -18,7 +20,7 @@ All nodes with 'unsatisfiable' quorum sets are not included in the output and no
 
 The data written by the tool adheres to convential graph writing formats used by popular graph analysis tools such as Gephi and NetworkX.
 
-1. The adjacency list consists of lines with nodes labels.
+1. The adjacency list consists of lines with node labels.
     [See NetworkX documentation for description](https://networkx.org/documentation/stable/reference/readwrite/adjlist.html#format).
 2. See [Gephi Spreadsheet](https://gephi.org/users/supported-graph-formats/spreadsheet/) for details on the nodelist.
 

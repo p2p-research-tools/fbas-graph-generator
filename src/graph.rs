@@ -1,5 +1,22 @@
-use fbas_analyzer::Fbas;
-use fbas_reward_distributor::NodeRanking;
+use fbas_analyzer::{Fbas, NodeId};
+use fbas_reward_distributor::*;
+
+/// Optionally rank nodes using S-S Power Index or NodeRank and return a sorted list of nodes
+pub(crate) fn compute_influence(
+    node_ids: &[NodeId],
+    fbas: &Fbas,
+    alg: Option<RankingAlg>,
+    use_pks: bool,
+    qi_check: bool,
+) -> Vec<NodeRanking> {
+    let rankings = if let Some(rank_algo) = alg {
+        rank_nodes(fbas, rank_algo, qi_check)
+    } else {
+        // all nodes have the same weight
+        fbas.all_nodes().iter().map(|_| 1.0).collect()
+    };
+    create_node_ranking_report(node_ids, rankings, fbas, use_pks)
+}
 
 /// Gets an FBAS and returns a list or neighbours for every node
 pub(crate) fn generate_adjacency_list(fbas: &Fbas) -> Vec<String> {
@@ -53,6 +70,38 @@ mod tests {
         ];
         let actual = generate_node_list_with_weight(&rankings);
         let expected = vec!["0,nodeA,0\n", "1,nodeB,0.1\n", "2,nodeC,0.2\n"];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn compute_unweighted_node_rankings() {
+        let fbas = Fbas::from_json_file(Path::new("test_data/trivial.json"));
+        let node_ids: Vec<NodeId> = (0..fbas.all_nodes().len()).collect();
+        let qi_check = false;
+        let use_pks = false;
+        let alg = None;
+        let actual = compute_influence(&node_ids, &fbas, alg, use_pks, qi_check);
+        let expected = vec![
+            (0, String::from(""), 1.0),
+            (1, String::from(""), 1.0),
+            (2, String::from(""), 1.0),
+        ];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn compute_weighted_node_rankings() {
+        let fbas = Fbas::from_json_file(Path::new("test_data/trivial.json"));
+        let node_ids: Vec<NodeId> = (0..fbas.all_nodes().len()).collect();
+        let qi_check = false;
+        let use_pks = false;
+        let alg = Some(RankingAlg::PowerIndexEnum(None));
+        let actual = compute_influence(&node_ids, &fbas, alg, use_pks, qi_check);
+        let expected = vec![
+            (0, String::from(""), 0.333),
+            (1, String::from(""), 0.333),
+            (2, String::from(""), 0.333),
+        ];
         assert_eq!(actual, expected);
     }
 }

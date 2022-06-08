@@ -9,9 +9,9 @@ Generate (weighted) trust graphs for FBASs like [Stellar](https://www.stellar.or
 
 The binary reads an FBAS in [stellarbeat](https://stellarbeat.io/)'s JSON format and
 
-- ranks the nodes using the [fbas-rewards-distributor](https://github.com/cndolo/fbas-reward-distributor)
+- ranks the nodes using the [fbas-rewards-distributor](https://github.com/cndolo/fbas-reward-distributor) if instructed to
 - writes 2 files containing commonly used graph encodings, i.e.
-    - a nodes list with weights (using one of the algorithms implemented in the above tool) for each node and
+    - a nodes list with optional weights (using one of the algorithms implemented in the above tool) for each node and
     - an adjacency list
 
 All nodes with 'unsatisfiable' quorum sets are not included in the output and nodes marked as inactive can optionally be excluded from the output.

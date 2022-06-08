@@ -1,4 +1,4 @@
-use fbas_analyzer::{Fbas, NodeId};
+use fbas_analyzer::NodeId;
 use fbas_reward_distributor::*;
 
 use std::path::PathBuf;
@@ -31,8 +31,9 @@ struct Opt {
     /// Will use STDIN if omitted.
     nodes_path: PathBuf,
 
+    /// Ranking algorithm to use.
     #[structopt(subcommand)]
-    alg_config: RankingAlgConfig,
+    alg_config: Option<RankingAlgConfig>,
 
     /// Prior to any analysis, filter out all nodes marked as `"active" == false` in the input
     /// nodes JSON (the one at `nodes_path`).
@@ -64,25 +65,16 @@ enum RankingAlgConfig {
     PowerIndexApprox { s: usize },
 }
 
-/// Rank nodes using either S-S Power Index or NodeRank and return a sorted list of nodes
-fn compute_influence(
-    node_ids: &[NodeId],
-    fbas: &Fbas,
-    alg: RankingAlg,
-    use_pks: bool,
-    qi_check: bool,
-) -> Vec<NodeRanking> {
-    let rankings = rank_nodes(fbas, alg, qi_check);
-    create_node_ranking_report(node_ids, rankings, fbas, use_pks)
-}
-
 fn main() {
     let args = Opt::from_args();
     let qi_check = !args.dont_check_for_qi;
     let alg = match args.alg_config {
-        RankingAlgConfig::NodeRank => RankingAlg::NodeRank,
-        RankingAlgConfig::PowerIndexEnum => RankingAlg::PowerIndexEnum(None),
-        RankingAlgConfig::PowerIndexApprox { s } => RankingAlg::PowerIndexApprox(s, None),
+        Some(RankingAlgConfig::NodeRank) => Some(RankingAlg::NodeRank),
+        Some(RankingAlgConfig::PowerIndexEnum) => Some(RankingAlg::PowerIndexEnum(None)),
+        Some(RankingAlgConfig::PowerIndexApprox { s }) => {
+            Some(RankingAlg::PowerIndexApprox(s, None))
+        }
+        None => None,
     };
     let input_filename = args.nodes_path;
     let mut output_path = match input_filename.file_stem() {
@@ -93,20 +85,23 @@ fn main() {
         None => panic!("error occured while reading input file name"),
     };
     let alg_as_str = match alg {
-        RankingAlg::NodeRank => String::from("node_rank"),
-        RankingAlg::PowerIndexEnum(_) => String::from("power_index_enum"),
-        RankingAlg::PowerIndexApprox(_, _) => String::from("power_index_approx"),
+        Some(RankingAlg::NodeRank) => String::from("node_rank"),
+        Some(RankingAlg::PowerIndexEnum(_)) => String::from("power_index_enum"),
+        Some(RankingAlg::PowerIndexApprox(_, _)) => String::from("power_index_approx"),
+        None => String::from("unweighted"),
     };
     output_path = format!("{}_{}", output_path, alg_as_str);
     let fbas = io::load_fbas(&input_filename, args.ignore_inactive_nodes);
     let node_ids: Vec<NodeId> = (0..fbas.all_nodes().len()).collect();
-    let mut rankings = compute_influence(&node_ids, &fbas, alg.clone(), args.pks, qi_check);
+    let mut rankings = graph::compute_influence(&node_ids, &fbas, alg.clone(), args.pks, qi_check);
     // normalise noderank scores
-    if alg == RankingAlg::NodeRank {
-        let node_rank_sum: Score = rankings.iter().map(|v| v.2 as Score).sum();
-        for (_, node_ranking) in rankings.iter_mut().enumerate() {
-            let normalised_ranking = node_ranking.2 / node_rank_sum;
-            node_ranking.2 = f64::trunc(normalised_ranking * 1000.0) / 1000.0;
+    if let Some(algo) = alg {
+        if algo == RankingAlg::NodeRank {
+            let node_rank_sum: Score = rankings.iter().map(|v| v.2 as Score).sum();
+            for (_, node_ranking) in rankings.iter_mut().enumerate() {
+                let normalised_ranking = node_ranking.2 / node_rank_sum;
+                node_ranking.2 = f64::trunc(normalised_ranking * 1000.0) / 1000.0;
+            }
         }
     }
     let adj_list = graph::generate_adjacency_list(&fbas);

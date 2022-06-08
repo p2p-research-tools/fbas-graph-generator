@@ -24,7 +24,7 @@ pub(crate) fn write_nodelist_to_file(
     filename: String,
     node_list: Vec<String>,
     overwrite: bool,
-) {
+) -> Result<String, std::io::Error> {
     if let Some(path_to_dir) = output_dir {
         let file_name = format!("{}/{}{}{}", path_to_dir, filename, "_nodelist", ".csv");
         if !overwrite {
@@ -42,7 +42,12 @@ pub(crate) fn write_nodelist_to_file(
             file.write_all(line.as_bytes()).unwrap();
         }
         println!("Written node list to {}", file_name);
+        return Ok(file_name);
     };
+    Err(std::io::Error::new(
+        std::io::ErrorKind::Other,
+        "invalid directory path",
+    ))
 }
 
 /// Writes an adjaceny list to the text for all the nodes in the FBAS on a separate line
@@ -51,7 +56,7 @@ pub(crate) fn write_edgelist_to_file(
     filename: String,
     adj_list: Vec<String>,
     overwrite: bool,
-) {
+) -> Result<String, std::io::Error> {
     if let Some(path_to_dir) = output_dir {
         let file_name = format!(
             "{}/{}{}{}",
@@ -71,7 +76,12 @@ pub(crate) fn write_edgelist_to_file(
             file.write_all(line.as_bytes()).unwrap();
         }
         println!("Written adjacency list to {}", file_name);
+        return Ok(file_name);
     };
+    Err(std::io::Error::new(
+        std::io::ErrorKind::Other,
+        "invalid directory path",
+    ))
 }
 
 pub(crate) fn load_fbas(nodes_path: &Path, ignore_inactive_nodes: bool) -> Fbas {
@@ -86,4 +96,55 @@ pub(crate) fn load_fbas(nodes_path: &Path, ignore_inactive_nodes: bool) -> Fbas 
     fbas = fbas.without_nodes(&unsatisfiable_nodes);
     eprintln!("Processing FBAS with {} nodes.", fbas.number_of_nodes());
     fbas
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::graph::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn create_dir() {
+        let tmp_dir = TempDir::new().expect("Error creating TempDir");
+        let output_path = tmp_dir.path().to_path_buf();
+        let expected = create_output_dir(Some(&output_path));
+        let actual = Some(tmp_dir.path().display().to_string());
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn write_edgelist() {
+        let fbas = Fbas::from_json_file(Path::new("test_data/trivial.json"));
+        let output_dir = TempDir::new().expect("Error creating TempDir");
+        let overwrite = false;
+        let file_name = String::from("edgelist-test-file");
+        let adj_list = generate_adjacency_list(&fbas);
+        let output_file_path = write_edgelist_to_file(
+            Some(output_dir.path().display().to_string()),
+            file_name.clone(),
+            adj_list,
+            overwrite,
+        );
+        assert!(output_file_path.is_ok());
+    }
+
+    #[test]
+    fn write_nodelist() {
+        let output_dir = TempDir::new().expect("Error creating TempDir");
+        let overwrite = false;
+        let file_name = String::from("nodelist-test-file");
+        let rankings = vec![
+            (0, "nodeA".to_string(), 0.0),
+            (1, "nodeB".to_string(), 0.1),
+            (2, "nodeC".to_string(), 0.2),
+        ];
+        let node_list = generate_node_list_with_weight(&rankings);
+        let output_file_path = write_nodelist_to_file(
+            Some(output_dir.path().display().to_string()),
+            file_name.clone(),
+            node_list,
+            overwrite,
+        );
+        assert!(output_file_path.is_ok());
+    }
 }

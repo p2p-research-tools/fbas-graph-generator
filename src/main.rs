@@ -118,8 +118,10 @@ fn main() {
             output_path.clone(),
             node_list,
             args.overwrite,
-        );
-        io::write_edgelist_to_file(output_dir, output_path, adj_list, args.overwrite);
+        )
+        .expect("Encountered error while writing node list to file.");
+        io::write_edgelist_to_file(output_dir, output_path, adj_list, args.overwrite)
+            .expect("Encountered error while writing adjacency list to file.");
     } else {
         eprintln!("unable to write to specified output dir");
     }

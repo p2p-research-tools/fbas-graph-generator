@@ -104,7 +104,7 @@ fn main() {
             }
         }
     }
-    let adj_list = graph::generate_adjacency_list(&fbas);
+    let adj_list = graph::generate_adjacency_matrix(&fbas);
     let node_list = graph::generate_node_list_with_weight(&rankings);
     let output_dir = io::create_output_dir(args.output.as_ref());
     if output_dir.is_some() {
@@ -115,7 +115,7 @@ fn main() {
             args.overwrite,
         )
         .expect("Encountered error while writing node list to file.");
-        io::write_edgelist_to_file(output_dir, output_path, adj_list, args.overwrite)
+        io::write_adjacency_matrix_to_file(output_dir, output_path, adj_list, args.overwrite)
             .expect("Encountered error while writing adjacency list to file.");
     } else {
         eprintln!("unable to write to specified output dir");

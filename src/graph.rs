@@ -18,22 +18,40 @@ pub(crate) fn compute_influence(
     create_node_ranking_report(node_ids, rankings, fbas, use_pks)
 }
 
-/// Gets an FBAS and returns a list or neighbours for every node
-pub(crate) fn generate_adjacency_list(fbas: &Fbas) -> Vec<String> {
-    let mut adj_list: Vec<Vec<String>> = Vec::default();
-    for node in fbas.all_nodes().into_iter() {
-        let own_list = vec![node.to_string()];
-        adj_list.push(own_list);
-    }
-    for node in fbas.all_nodes().into_iter() {
-        // this node has an edge to these nodes
-        let contained_nodes = fbas.get_quorum_set(node).unwrap().contained_nodes();
-        for target in contained_nodes.into_iter() {
-            adj_list[target].push(node.to_string());
+/// Gets an FBAS and returns an adjaceny matrix of the FBAS
+pub(crate) fn generate_adjacency_matrix(fbas: &Fbas) -> Vec<String> {
+    let mut adj_matrix: Vec<Vec<usize>> = Vec::with_capacity(fbas.all_nodes().len());
+    // first line should contain all nodes in the format ';A;B;C;D;E'
+    let mut header: String = String::default();
+    for source in fbas.all_nodes().into_iter() {
+        header.push_str(format!(";{}", source).as_str());
+        // make sure all entries in the matrix are present
+        adj_matrix.push(vec![0; fbas.all_nodes().len()]);
+        // edge source -> links
+        let links = fbas.get_quorum_set(source).unwrap().contained_nodes();
+        for target in links.into_iter() {
+            adj_matrix[source][target] = 1;
         }
     }
-
-    adj_list.iter().map(|nodelist| nodelist.join(" ")).collect()
+    let mut matrix: Vec<String> = vec![header];
+    for node in fbas.all_nodes().into_iter() {
+        let row_as_string: String = format!(
+            "{};{}",
+            node,
+            adj_matrix[node]
+                .iter()
+                .map(|target| format!("{};", target))
+                .collect::<String>()
+        );
+        // drop final semi-colon
+        matrix.push(
+            row_as_string
+                .chars()
+                .take(row_as_string.len() - 1)
+                .collect::<String>(),
+        );
+    }
+    matrix
 }
 
 /// Gets a vec of tupels of the type (NodeId, PublicKey, Score) and returns them as strings in the
@@ -54,10 +72,10 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn output_adjacency_list_is_ok() {
+    fn output_adjacency_matrix_is_ok() {
         let fbas = Fbas::from_json_file(Path::new("test_data/trivial.json"));
-        let actual = generate_adjacency_list(&fbas);
-        let expected = vec!["0 0 1 2", "1 0 1 2", "2 0 1 2"];
+        let actual = generate_adjacency_matrix(&fbas);
+        let expected = vec![";0;1;2", "0;1;1;1", "1;1;1;1", "2;1;1;1"];
         assert_eq!(actual, expected);
     }
 

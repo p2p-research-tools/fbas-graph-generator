@@ -50,8 +50,8 @@ pub(crate) fn write_nodelist_to_file(
     ))
 }
 
-/// Writes an adjaceny list to the text for all the nodes in the FBAS on a separate line
-pub(crate) fn write_edgelist_to_file(
+/// Writes an adjaceny matrix to the text for all the nodes in the FBAS on a separate line
+pub(crate) fn write_adjacency_matrix_to_file(
     output_dir: Option<String>,
     filename: String,
     adj_list: Vec<String>,
@@ -60,7 +60,7 @@ pub(crate) fn write_edgelist_to_file(
     if let Some(path_to_dir) = output_dir {
         let file_name = format!(
             "{}/{}{}{}",
-            path_to_dir, filename, "_adjacency_list", ".csv"
+            path_to_dir, filename, "_adjacency_matrix", ".csv"
         );
         if !overwrite {
             assert!(
@@ -71,8 +71,8 @@ pub(crate) fn write_edgelist_to_file(
         }
         let file = File::create(file_name.clone()).expect("Error creating file");
         let mut file = LineWriter::new(file);
-        for edges in adj_list {
-            let line = format!("{}\n", edges);
+        for node in adj_list {
+            let line = format!("{}\n", node);
             file.write_all(line.as_bytes()).unwrap();
         }
         println!("Written adjacency list to {}", file_name);
@@ -118,8 +118,8 @@ mod tests {
         let output_dir = TempDir::new().expect("Error creating TempDir");
         let overwrite = false;
         let file_name = String::from("edgelist-test-file");
-        let adj_list = generate_adjacency_list(&fbas);
-        let output_file_path = write_edgelist_to_file(
+        let adj_list = generate_adjacency_matrix(&fbas);
+        let output_file_path = write_adjacency_matrix_to_file(
             Some(output_dir.path().display().to_string()),
             file_name.clone(),
             adj_list,

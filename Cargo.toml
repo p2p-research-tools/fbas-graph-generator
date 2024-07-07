@@ -2,7 +2,7 @@
 name = "fbas-graph-generator"
 version = "0.1.0"
 edition = "2021"
-authors = ["Charmaine Ndolo <Charmaine.Ndolo@hu-berlin.de>"]
+authors = ["Charmaine Ndolo <charmaine.ndolo@tu-dresden.de>"]
 license = "MIT"
 keywords = ["stellar", "fbas", "mobilecoin", "centrality", "graphs"]
 categories = ["command-line-utilities", "science", "network-analysis"]

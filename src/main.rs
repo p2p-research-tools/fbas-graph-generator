@@ -13,7 +13,7 @@ mod io;
 #[derive(Debug, StructOpt)]
 #[structopt(
     name = "graph_generator",
-    about = "Rank nodes of an FBAS and write the results as a graph in a CSV",
+    about = "Generate the trust graph of an FBAS and output in common graph IO formats.",
     author = "Charmaine Ndolo"
 )]
 struct Opt {
